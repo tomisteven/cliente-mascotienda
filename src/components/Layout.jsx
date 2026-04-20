@@ -8,6 +8,7 @@ import {
   Tags, 
   History, 
   BarChart3, 
+  PieChart,
   ArrowRightLeft, 
   Users, 
   LogOut,
@@ -28,6 +29,7 @@ const Layout = () => {
     { name: 'Ventas', path: '/sales', icon: History },
     { name: 'Stock', path: '/stock', icon: ArrowRightLeft },
     { name: 'Reportes', path: '/reports', icon: BarChart3 },
+    { name: 'Estadísticas', path: '/statistics', icon: PieChart },
   ];
 
   if (user?.rol === 'admin') {
