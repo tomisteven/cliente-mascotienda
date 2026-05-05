@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import {
   Briefcase, ShoppingCart, DollarSign, TrendingUp, Package, PieChart as PieChartIcon,
-  Calendar, Info
+  Calendar, Info, CreditCard, ArrowRightLeft
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -87,7 +87,7 @@ const SalesHeatmap = ({ data }) => {
             <div
               key={idx}
               onClick={() => navigate(`/statistics/day/${day.date}`)}
-              className={`flex-shrink-0 w-40 h-45 rounded-3xl p-5 flex flex-col justify-between transition-all duration-300 hover:scale-105 hover:-translate-y-1 shadow-2xl relative overflow-hidden cursor-pointer group ${getColor(day.total)}`}
+              className={`flex-shrink-0 w-40 min-h-[180px] rounded-3xl p-5 flex flex-col transition-all duration-300 hover:scale-105 hover:-translate-y-1 shadow-2xl relative overflow-hidden cursor-pointer group ${getColor(day.total)}`}
             >
               {/* Fondo decorativo */}
               <div className="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -111,6 +111,30 @@ const SalesHeatmap = ({ data }) => {
                   <div className="flex flex-col ">
                     <span className="text-[9px] font-bold uppercase opacity-60 ">Ganancia</span>
                     <span className="text-sm font-black text-white/90 truncate">{formatCurrency(day.profit)}</span>
+                  </div>
+
+                  <div className="pt-2 mt-2 border-t border-white/20 space-y-1">
+                    <div className="flex items-center justify-between text-[10px] font-bold">
+                      <div className="flex items-center gap-1 opacity-70">
+                        <DollarSign size={10} />
+                        <span>EFE</span>
+                      </div>
+                      <span>{formatCurrency(day.efectivo || 0)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] font-bold">
+                      <div className="flex items-center gap-1 opacity-70">
+                        <CreditCard size={10} />
+                        <span>TAR</span>
+                      </div>
+                      <span>{formatCurrency(day.tarjeta || 0)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] font-bold">
+                      <div className="flex items-center gap-1 opacity-70">
+                        <ArrowRightLeft size={10} />
+                        <span>TRA</span>
+                      </div>
+                      <span>{formatCurrency(day.transferencia || 0)}</span>
+                    </div>
                   </div>
                 </div>
               </div>

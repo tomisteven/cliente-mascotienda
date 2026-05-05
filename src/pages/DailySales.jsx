@@ -17,6 +17,7 @@ const DailySales = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSale, setSelectedSale] = useState(null);
+  const [paymentFilter, setPaymentFilter] = useState('todos');
 
   useEffect(() => {
     fetchDailySales();
@@ -35,13 +36,22 @@ const DailySales = () => {
     }
   };
 
+  const filteredSales = sales.filter(sale => 
+    paymentFilter === 'todos' || sale.metodoPago === paymentFilter
+  );
+
   const totals = sales.reduce((acc, sale) => {
     if (sale.estado === 'completada') {
       acc.total += sale.totalFinal;
       acc.count += 1;
+      
+      // Totales por método de pago para el resumen
+      if (sale.metodoPago === 'efectivo') acc.efectivo += sale.totalFinal;
+      if (sale.metodoPago === 'tarjeta') acc.tarjeta += sale.totalFinal;
+      if (sale.metodoPago === 'transferencia') acc.transferencia += sale.totalFinal;
     }
     return acc;
-  }, { total: 0, count: 0 });
+  }, { total: 0, count: 0, efectivo: 0, tarjeta: 0, transferencia: 0 });
 
   return (
     <div className="space-y-6 flex flex-col h-full animate-in fade-in duration-500">
@@ -66,15 +76,51 @@ const DailySales = () => {
         </div>
 
         <div className="flex gap-4">
-           <div className="bg-surface/50 px-6 py-3 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-md">
+           <div className="bg-surface/50 px-6 py-3 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-md flex flex-col justify-center">
               <p className="text-[10px] text-textMuted font-bold uppercase mb-1">Operaciones</p>
               <p className="text-xl font-black text-primary">{totals.count}</p>
            </div>
            <div className="bg-surface/50 px-6 py-3 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-md">
-              <p className="text-[10px] text-textMuted font-bold uppercase mb-1">Total Facturado</p>
-              <p className="text-xl font-black text-emerald-400">{formatCurrency(totals.total)}</p>
+              <div className="flex gap-6">
+                <div>
+                  <p className="text-[10px] text-textMuted font-bold uppercase mb-1">Total Día</p>
+                  <p className="text-xl font-black text-emerald-400">{formatCurrency(totals.total)}</p>
+                </div>
+                <div className="h-10 w-[1px] bg-slate-800 self-center"></div>
+                <div className="flex gap-4">
+                  <div>
+                    <p className="text-[8px] text-textMuted font-bold uppercase">Efectivo</p>
+                    <p className="text-xs font-black text-textLight">{formatCurrency(totals.efectivo)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] text-textMuted font-bold uppercase">Tarjeta</p>
+                    <p className="text-xs font-black text-textLight">{formatCurrency(totals.tarjeta)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] text-textMuted font-bold uppercase">Transf.</p>
+                    <p className="text-xs font-black text-textLight">{formatCurrency(totals.transferencia)}</p>
+                  </div>
+                </div>
+              </div>
            </div>
         </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800 self-start">
+        {['todos', 'efectivo', 'tarjeta', 'transferencia'].map((m) => (
+          <button
+            key={m}
+            onClick={() => setPaymentFilter(m)}
+            className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+              paymentFilter === m 
+                ? 'bg-primary text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]' 
+                : 'text-textMuted hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            {m === 'todos' ? 'Ver Todas' : m}
+          </button>
+        ))}
       </div>
 
       {/* Sales Table */}
@@ -101,17 +147,17 @@ const DailySales = () => {
                     </div>
                   </td>
                 </tr>
-              ) : sales.length === 0 ? (
+              ) : filteredSales.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="py-20 text-center">
                     <div className="flex flex-col items-center opacity-40">
                       <ShoppingBag size={48} className="mb-4" />
-                      <p className="text-lg">No se registraron ventas este día</p>
+                      <p className="text-lg">No hay ventas con este método de pago</p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                sales.map((sale) => (
+                filteredSales.map((sale) => (
                   <tr 
                     key={sale._id} 
                     className="group hover:bg-slate-800/40 transition-all cursor-pointer"
