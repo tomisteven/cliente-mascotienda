@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { 
+import {
   LayoutDashboard, 
   ShoppingCart, 
   Package, 
@@ -24,10 +24,22 @@ import {
   Receipt,
   Building2,
   ShoppingBag,
-  PackageX
+  PackageX,
+  Globe
 } from 'lucide-react';
 
 const UPDATES = [
+  {
+    version: '2.1.0',
+    title: 'Catálogo Público',
+    icon: Globe,
+    items: [
+      'Nueva página /catalogo accesible sin iniciar sesión',
+      'Landing moderna con todos los productos, precios y stock',
+      'Buscador y filtro por categoría',
+      'Compartí el enlace con tus clientes para que vean el catálogo online'
+    ]
+  },
   {
     version: '2.0.0',
     title: 'Nuevo Módulo: Gestión',
@@ -144,7 +156,7 @@ const Layout = () => {
         } md:translate-x-0 fixed md:relative z-40 w-64 h-full bg-surface border-r border-slate-800 transition-transform duration-300 flex flex-col`}
       >
         <div className="p-6 flex items-center justify-center border-b border-slate-800">
-           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">KioscoPOS</h1>
+           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">MASCOTIENDA</h1>
         </div>
         
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">

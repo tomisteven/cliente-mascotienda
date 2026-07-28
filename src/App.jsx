@@ -20,6 +20,7 @@ import DailySales from './pages/DailySales';
 import RVentas from './pages/RVentas';
 import Gestion from './pages/Gestion';
 import Budgets from './pages/Budgets';
+import Catalogo from './pages/Catalogo';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           />
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/catalogo" element={<Catalogo />} />
 
             <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Navigate to="/dashboard" replace />} />
