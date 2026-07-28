@@ -13,7 +13,8 @@ import {
   Users, 
   LogOut,
   Menu,
-  X
+  X,
+  TrendingUp
 } from 'lucide-react';
 
 const Layout = () => {
@@ -27,6 +28,7 @@ const Layout = () => {
     { name: 'Productos', path: '/products', icon: Package },
     { name: 'Categorías', path: '/categories', icon: Tags },
     { name: 'Ventas', path: '/sales', icon: History },
+    { name: 'R - Ventas', path: '/rventas', icon: TrendingUp },
     { name: 'Stock', path: '/stock', icon: ArrowRightLeft },
     { name: 'Reportes', path: '/reports', icon: BarChart3 },
     { name: 'Estadísticas', path: '/statistics', icon: PieChart },

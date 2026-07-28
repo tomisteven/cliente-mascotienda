@@ -17,6 +17,7 @@ import Stock from './pages/Stock';
 import Users from './pages/Users';
 import Statistics from './pages/Statistics';
 import DailySales from './pages/DailySales';
+import RVentas from './pages/RVentas';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
               <Route path="stock" element={<Stock />} />
               <Route path="statistics" element={<Statistics />} />
               <Route path="statistics/day/:date" element={<DailySales />} />
+              <Route path="rventas" element={<RVentas />} />
               
               <Route path="users" element={
                 <ProtectedRoute requireAdmin={true}>
