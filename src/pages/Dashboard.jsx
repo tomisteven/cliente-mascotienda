@@ -5,8 +5,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 import {
   TrendingUp, ShoppingCart, DollarSign, Receipt, AlertTriangle, Package,
   PackageX, ShoppingBag, Clock, ArrowRight, Sparkles, ChevronRight,
-  Store, AlertCircle
+  Store, AlertCircle, Globe, Share2
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const formatCurrency = (val) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(val);
 
@@ -18,24 +19,22 @@ const formatNum = (val) => {
 const now = new Date();
 const greeting = () => {
   const h = now.getHours();
-  if (h < 12) return 'Buenos días';
+  if (h < 12) return 'Buenos d\u00edas';
   if (h < 18) return 'Buenas tardes';
   return 'Buenas noches';
 };
-const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const dias = ['Domingo', 'Lunes', 'Martes', 'Mi\u00e9rcoles', 'Jueves', 'Viernes', 'S\u00e1bado'];
 const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-const fechaStr = `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} de ${now.getFullYear()}`;
+const fechaStr = dias[now.getDay()] + ', ' + now.getDate() + ' de ' + meses[now.getMonth()] + ' de ' + now.getFullYear();
 
-const Card = ({ icon: Icon, label, value, sub, gradient, accent, delay = 0 }) => (
-  <div
-    className="group bg-surface rounded-2xl border border-slate-800/80 p-5 hover:border-slate-700/80 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/50 hover:-translate-y-0.5"
-  >
+const Card = ({ icon: Icon, label, value, sub, gradient }) => (
+  <div className="group bg-surface rounded-2xl border border-slate-800/80 p-5 hover:border-slate-700/80 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/50 hover:-translate-y-0.5">
     <div className="flex items-start justify-between">
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${gradient}`}>
+      <div className={'w-11 h-11 rounded-xl flex items-center justify-center ' + gradient}>
         <Icon size={20} className="text-white" />
       </div>
       {sub !== undefined && (
-        <span className={`text-xs font-bold px-2 py-1 rounded-full ${sub >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+        <span className={'text-xs font-bold px-2 py-1 rounded-full ' + (sub >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400')}>
           {sub > 0 ? '+' : ''}{sub}
         </span>
       )}
@@ -66,7 +65,7 @@ const Dashboard = () => {
         ]);
 
         const chartData = (resSummary.data.ventasPorHora || []).map(item => ({
-          hora: `${String(item._id).padStart(2, '0')}:00`,
+          hora: String(item._id).padStart(2, '0') + ':00',
           total: item.total,
         }));
 
@@ -84,6 +83,12 @@ const Dashboard = () => {
     fetchAll();
   }, []);
 
+  const handleShareCatalog = () => {
+    const url = window.location.origin + '/catalogo';
+    navigator.clipboard.writeText(url);
+    toast.success('Link del cat\u00e1logo copiado');
+  };
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -92,7 +97,7 @@ const Dashboard = () => {
     );
   }
 
-  const totalProducts = globalStats?.productos?.total || 0;
+  const totalProducts = globalStats && globalStats.productos ? globalStats.productos.total : 0;
 
   return (
     <div className="space-y-6">
@@ -117,27 +122,34 @@ const Dashboard = () => {
             <ShoppingCart size={16} className="mr-2" />
             Nueva Venta
           </Link>
+          <Link to="/catalogo" target="_blank" className="bg-white/5 hover:bg-white/10 border border-slate-700/50 text-textLight px-4 py-2 rounded-xl transition-all flex items-center text-sm font-medium">
+            <Globe size={16} className="mr-2 opacity-70" />
+            Catalogo
+          </Link>
+          <button onClick={handleShareCatalog} className="bg-white/5 hover:bg-white/10 border border-slate-700/50 text-textLight px-4 py-2 rounded-xl transition-all flex items-center text-sm font-medium" title="Compartir cat\u00e1logo">
+            <Share2 size={16} className="opacity-70" />
+          </button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card
           icon={DollarSign}
-          label="Facturación Hoy"
-          value={formatCurrency(summary?.facturacionHoy || 0)}
+          label="Facturaci\u00f3n Hoy"
+          value={formatCurrency(summary ? summary.facturacionHoy : 0)}
           gradient="bg-gradient-to-br from-blue-500 to-blue-700"
         />
         <Card
           icon={TrendingUp}
           label="Ganancia Hoy"
-          value={formatCurrency(summary?.gananciaHoy || 0)}
+          value={formatCurrency(summary ? summary.gananciaHoy : 0)}
           gradient="bg-gradient-to-br from-emerald-500 to-emerald-700"
-          sub={summary?.facturacionHoy > 0 ? Math.round((summary.gananciaHoy / summary.facturacionHoy) * 100) : 0}
+          sub={summary && summary.facturacionHoy > 0 ? Math.round((summary.gananciaHoy / summary.facturacionHoy) * 100) : 0}
         />
         <Card
           icon={Receipt}
           label="Tickets"
-          value={summary?.ventasHoy || 0}
+          value={summary ? summary.ventasHoy : 0}
           gradient="bg-gradient-to-br from-purple-500 to-purple-700"
         />
         <Card
@@ -154,9 +166,9 @@ const Dashboard = () => {
             <div className="w-9 h-9 rounded-lg bg-indigo-500/15 flex items-center justify-center">
               <Store size={16} className="text-indigo-400" />
             </div>
-            <p className="text-textMuted text-xs font-medium uppercase tracking-wider">Facturación del Mes</p>
+            <p className="text-textMuted text-xs font-medium uppercase tracking-wider">Facturaci\u00f3n del Mes</p>
           </div>
-          <p className="text-xl font-bold text-textLight">{formatCurrency(summary?.mes?.facturacion || 0)}</p>
+          <p className="text-xl font-bold text-textLight">{formatCurrency(summary && summary.mes ? summary.mes.facturacion : 0)}</p>
         </div>
         <div className="bg-surface rounded-2xl border border-slate-800/80 p-5">
           <div className="flex items-center gap-3 mb-3">
@@ -165,7 +177,7 @@ const Dashboard = () => {
             </div>
             <p className="text-textMuted text-xs font-medium uppercase tracking-wider">Ganancia del Mes</p>
           </div>
-          <p className="text-xl font-bold text-textLight">{formatCurrency(summary?.mes?.ganancia || 0)}</p>
+          <p className="text-xl font-bold text-textLight">{formatCurrency(summary && summary.mes ? summary.mes.ganancia : 0)}</p>
         </div>
         <div className="bg-surface rounded-2xl border border-slate-800/80 p-5">
           <div className="flex items-center gap-3 mb-3">
@@ -183,7 +195,7 @@ const Dashboard = () => {
             </div>
             <p className="text-textMuted text-xs font-medium uppercase tracking-wider">Sin Movimiento</p>
           </div>
-          <p className="text-xl font-bold text-textLight">{withoutMovement?.total || 0}</p>
+          <p className="text-xl font-bold text-textLight">{withoutMovement ? withoutMovement.total : 0}</p>
         </div>
       </div>
 
@@ -198,10 +210,10 @@ const Dashboard = () => {
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={summary?.chartData || []}>
+              <BarChart data={summary ? summary.chartData : []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                 <XAxis dataKey="hora" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`} />
+                <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => '$' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val)} />
                 <RechartsTooltip
                   cursor={{ fill: '#1e293b', opacity: 0.6 }}
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.75rem', border: '1px solid #334155', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)' }}
@@ -219,24 +231,24 @@ const Dashboard = () => {
             <div className="flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
               <button
                 onClick={() => setActiveTab('top')}
-                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${activeTab === 'top' ? 'bg-indigo-500/15 text-indigo-400' : 'text-textMuted hover:text-textLight'}`}
+                className={'text-xs font-bold px-3 py-1.5 rounded-lg transition-all ' + (activeTab === 'top' ? 'bg-indigo-500/15 text-indigo-400' : 'text-textMuted hover:text-textLight')}
               >
                 Top Productos
               </button>
               <button
                 onClick={() => setActiveTab('stock')}
-                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${activeTab === 'stock' ? 'bg-amber-500/15 text-amber-400' : 'text-textMuted hover:text-textLight'}`}
+                className={'text-xs font-bold px-3 py-1.5 rounded-lg transition-all ' + (activeTab === 'stock' ? 'bg-amber-500/15 text-amber-400' : 'text-textMuted hover:text-textLight')}
               >
                 Stock Bajo
               </button>
             </div>
             <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar pr-1">
               {activeTab === 'top' ? (
-                summary?.topProducts?.length > 0 ? (
+                summary && summary.topProducts && summary.topProducts.length > 0 ? (
                   summary.topProducts.map((p, idx) => (
                     <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800/30 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-extrabold ${idx === 0 ? 'bg-amber-500/20 text-amber-400' : idx === 1 ? 'bg-slate-400/20 text-slate-300' : idx === 2 ? 'bg-amber-700/20 text-amber-600' : 'bg-slate-800 text-textMuted'}`}>
+                        <div className={'w-7 h-7 rounded-lg flex items-center justify-center text-xs font-extrabold ' + (idx === 0 ? 'bg-amber-500/20 text-amber-400' : idx === 1 ? 'bg-slate-400/20 text-slate-300' : idx === 2 ? 'bg-amber-700/20 text-amber-600' : 'bg-slate-800 text-textMuted')}>
                           {idx + 1}
                         </div>
                         <p className="text-sm font-medium text-textLight truncate max-w-[140px]">{p.nombre}</p>
@@ -252,12 +264,12 @@ const Dashboard = () => {
                   lowStock.slice(0, 6).map((p) => (
                     <div key={p._id} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800/30 transition-colors">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${p.stock === 0 ? 'bg-red-500/15' : 'bg-amber-500/15'}`}>
+                        <div className={'w-7 h-7 rounded-lg flex items-center justify-center ' + (p.stock === 0 ? 'bg-red-500/15' : 'bg-amber-500/15')}>
                           <AlertCircle size={14} className={p.stock === 0 ? 'text-red-400' : 'text-amber-400'} />
                         </div>
                         <p className="text-sm text-textLight truncate max-w-[140px]">{p.nombre}</p>
                       </div>
-                      <span className={`text-xs font-bold px-2 py-1 rounded-md ${p.stock === 0 ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400'}`}>
+                      <span className={'text-xs font-bold px-2 py-1 rounded-md ' + (p.stock === 0 ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-400')}>
                         {p.stock} {p.unidadMedida === 'unidad' ? 'u.' : p.unidadMedida}
                       </span>
                     </div>
@@ -268,7 +280,7 @@ const Dashboard = () => {
               )}
             </div>
             <Link to={activeTab === 'top' ? '/rventas' : '/products'} className="mt-3 flex items-center justify-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors pt-2 border-t border-slate-800/50">
-              Ver más <ChevronRight size={12} />
+              Ver m\u00e1s <ChevronRight size={12} />
             </Link>
           </div>
         </div>
@@ -279,7 +291,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-bold text-textLight flex items-center gap-2">
               <Clock size={16} className="text-slate-400" />
-              Últimas Ventas
+              \u00daltimas Ventas
             </h3>
             <Link to="/sales" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
               Ver todas <ArrowRight size={12} />
@@ -300,7 +312,7 @@ const Dashboard = () => {
                 {recentSales.slice(0, 5).map((s) => (
                   <tr key={s._id} className="hover:bg-slate-800/20 transition-colors">
                     <td className="py-3 text-textLight font-mono text-xs">{s.numeroTicket}</td>
-                    <td className="py-3 text-textLight text-sm">{s.cliente || '—'}</td>
+                    <td className="py-3 text-textLight text-sm">{s.cliente || '\u2014'}</td>
                     <td className="py-3 text-textLight font-bold text-right">{formatCurrency(s.totalFinal)}</td>
                     <td className="py-3 text-textMuted text-right hidden sm:table-cell capitalize">{s.metodoPago}</td>
                     <td className="py-3 text-textMuted text-xs text-right hidden sm:table-cell">
