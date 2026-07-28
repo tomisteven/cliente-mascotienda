@@ -55,7 +55,7 @@ export const CartProvider = ({ children }) => {
         esVentaSuelta: options.esVentaSuelta || false,
         kilosVendidos: options.kilosVendidos,
         esGenerico: options.esGenerico || false,
-        precioUnitario: options.precioVenta // Para mandar al backend en genéricos
+        precioUnitario: precioVenta
       }]);
     }
     return true;

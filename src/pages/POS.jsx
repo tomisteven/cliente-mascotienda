@@ -4,7 +4,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 import {
-   Search, Plus, Minus, Trash2, Printer, CheckCircle, Tag, ShoppingCart, XCircle
+   Search, Plus, Minus, Trash2, Printer, CheckCircle, Tag, ShoppingCart, XCircle, FileText
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -28,6 +28,10 @@ const POS = () => {
    const [metodoPago, setMetodoPago] = useState('efectivo');
    const [montoRecibido, setMontoRecibido] = useState('');
    const [notas, setNotas] = useState('');
+  const [budgetName, setBudgetName] = useState('');
+  const [budgetPhone, setBudgetPhone] = useState('');
+  const [budgetNotas, setBudgetNotas] = useState('');
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
 
    // Checkout Modal
    const [showModal, setShowModal] = useState(false);
@@ -110,6 +114,34 @@ const POS = () => {
          toast.success('Venta registrada con éxito');
       } catch (error) {
          toast.error(error.response?.data?.message || 'Error al procesar la venta');
+      }
+   };
+
+   const handleBudget = async () => {
+      if (cartItems.length === 0) return toast.error('El carrito está vacío');
+
+      try {
+         const payload = {
+            items: cartItems.map(i => ({
+               producto: i.producto,
+               cantidad: i.cantidad,
+               precioUnitario: i.precioVenta,
+               subtotal: i.subtotal
+            })),
+            descuento: discount,
+            notas: budgetNotas.trim() || undefined,
+            clienteNombre: budgetName.trim() || undefined,
+            clienteTelefono: budgetPhone.trim() || undefined
+         };
+
+         await api.post('/budgets', payload);
+         toast.success('Presupuesto creado');
+         clearCart();
+         setBudgetName('');
+         setBudgetPhone('');
+         setBudgetNotas('');
+      } catch (error) {
+         toast.error('Error al crear presupuesto');
       }
    };
 
@@ -239,7 +271,7 @@ const POS = () => {
          </div>
 
          {/* Columna Derecha - Carrito / Ticket */}
-         <div className="w-full md:w-[40%] lg:w-[35%] bg-surface border border-slate-800 rounded-xl flex flex-col h-[60vh] md:h-full mt-4 md:mt-0 shadow-lg">
+         <div className="w-full md:w-[40%] lg:w-[35%] bg-surface border border-slate-800 rounded-xl flex flex-col h-[60vh] md:h-full mt-4 md:mt-0 shadow-lg overflow-hidden">
             <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 rounded-t-xl shrink-0">
                <h3 className="font-bold text-lg text-textLight flex items-center">
                   <ShoppingCart className="mr-2 text-primary" size={20} />
@@ -344,7 +376,7 @@ const POS = () => {
                   <span className="text-3xl text-primary font-black">{formatCurrency(cartTotal)}</span>
                </div>
 
-               {/* Notas */}
+                {/* Notas */}
                <div className="mb-3">
                   <label className="text-xs text-textMuted block mb-1">Notas (opcional)</label>
                   <textarea
@@ -356,13 +388,57 @@ const POS = () => {
                   />
                </div>
 
-               <button
-                  onClick={handleCheckout}
-                  disabled={cartItems.length === 0 || loading || (metodoPago === 'efectivo' && montoRecibido && parseFloat(montoRecibido) < cartTotal)}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/30 disabled:text-white/50 text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 uppercase tracking-wide transition-colors shadow-lg shadow-emerald-500/20"
-               >
-                  Confirmar Venta
-               </button>
+               {/* Presupuesto modal */}
+               {showBudgetModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowBudgetModal(false)}>
+                     <div className="bg-surface rounded-2xl border border-slate-700 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="p-5 border-b border-slate-800">
+                           <h3 className="text-lg font-bold text-amber-400 flex items-center gap-2">
+                              <FileText size={18} /> Presupuestar
+                           </h3>
+                        </div>
+                        <div className="p-5 space-y-4">
+                           <input type="text" placeholder="Nombre del cliente" value={budgetName}
+                              onChange={e => setBudgetName(e.target.value)}
+                              className="w-full bg-background border border-slate-700 rounded-lg px-3 py-2 text-sm text-textLight focus:outline-none focus:border-amber-500" />
+                           <input type="tel" placeholder="Teléfono (para WhatsApp)" value={budgetPhone}
+                              onChange={e => setBudgetPhone(e.target.value)}
+                              className="w-full bg-background border border-slate-700 rounded-lg px-3 py-2 text-sm text-textLight focus:outline-none focus:border-amber-500" />
+                           <textarea placeholder="Notas (opcional)" value={budgetNotas}
+                              onChange={e => setBudgetNotas(e.target.value)} rows={2}
+                              className="w-full bg-background border border-slate-700 rounded-lg px-3 py-2 text-sm text-textLight focus:outline-none focus:border-amber-500 resize-none" />
+                        </div>
+                        <div className="flex gap-3 p-5 border-t border-slate-800">
+                           <button onClick={() => setShowBudgetModal(false)}
+                              className="flex-1 py-2.5 rounded-lg border border-slate-700 text-textMuted hover:text-textLight transition-colors text-sm font-medium">
+                              Cancelar
+                           </button>
+                           <button onClick={() => { handleBudget(); setShowBudgetModal(false); }}
+                              className="flex-1 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-colors shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2">
+                              <FileText size={16} /> Crear Presupuesto
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+               )}
+
+               <div className="flex gap-2">
+                  <button
+                     onClick={() => setShowBudgetModal(true)}
+                     disabled={cartItems.length === 0}
+                     className="flex-1 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-500/30 disabled:text-white/50 text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 text-sm transition-colors shadow-lg shadow-amber-500/20"
+                  >
+                     <FileText size={18} />
+                     Presupuestar
+                  </button>
+                  <button
+                     onClick={handleCheckout}
+                     disabled={cartItems.length === 0 || loading || (metodoPago === 'efectivo' && montoRecibido && parseFloat(montoRecibido) < cartTotal)}
+                     className="flex-[2] bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-500/30 disabled:text-white/50 text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 uppercase tracking-wide transition-colors shadow-lg shadow-emerald-500/20"
+                  >
+                     Confirmar Venta
+                  </button>
+               </div>
             </div>
          </div>
 

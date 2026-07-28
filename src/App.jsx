@@ -18,6 +18,8 @@ import Users from './pages/Users';
 import Statistics from './pages/Statistics';
 import DailySales from './pages/DailySales';
 import RVentas from './pages/RVentas';
+import Gestion from './pages/Gestion';
+import Budgets from './pages/Budgets';
 
 function App() {
   return (
@@ -49,6 +51,8 @@ function App() {
               <Route path="statistics" element={<Statistics />} />
               <Route path="statistics/day/:date" element={<DailySales />} />
               <Route path="rventas" element={<RVentas />} />
+              <Route path="gestion" element={<Gestion />} />
+              <Route path="presupuestos" element={<Budgets />} />
               
               <Route path="users" element={
                 <ProtectedRoute requireAdmin={true}>
